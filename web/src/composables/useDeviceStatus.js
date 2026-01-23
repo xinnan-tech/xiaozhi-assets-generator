@@ -18,6 +18,7 @@ const deviceInfo = ref({
 })
 
 const token = ref('')
+const deviceId = ref('')
 const isChecking = ref(false)
 const retryTimer = ref(null)
 
@@ -29,11 +30,7 @@ const getUrlParameter = (name) => {
 
 // 调用MCP工具
 const callMcpTool = async (toolName, params = {}) => {
-  if (!token.value) {
-    throw new Error('Authentication token not found')
-  }
-
-  const response = await fetch('/api/messaging/device/tools/call', {
+  const response = await fetch(`/xiaozhi/device/tools/call/${deviceId.value}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -147,26 +144,26 @@ const fetchDeviceInfo = async () => {
 }
 
 // 检查设备是否在线
-const checkDeviceStatus = async () => {
-  if (isChecking.value || !token.value) return
-
+const checkDeviceStatus = async (isGettingDeviceInfo = true) => {
   isChecking.value = true
   try {
-    const response = await fetch('/api/messaging/device/tools/list', {
+    const response = await fetch(`/xiaozhi/device/tools/list/${deviceId.value}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token.value}`
-      }
+      },
     })
-
-    if (response.ok) {
+    const res = await response.json();
+    if (res.code === 0) {
       deviceStatus.value.isOnline = true
       deviceStatus.value.error = ''
       deviceStatus.value.lastCheck = new Date()
 
       // 获取设备详细信息
-      await fetchDeviceInfo()
+      if (isGettingDeviceInfo) {
+        await fetchDeviceInfo()
+      }
     } else {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
@@ -205,8 +202,10 @@ const getSignalDisplayText = (signal, t) => {
 
 // 初始化设备状态监控
 const initializeDeviceStatus = () => {
-  token.value = getUrlParameter('token')
-  if (token.value) {
+  const localToken = localStorage.getItem('token');
+  deviceId.value = getUrlParameter('deviceId')
+  if (localToken && deviceId.value) {
+    token.value = JSON.parse(localToken).token;
     checkDeviceStatus()
   }
 }
@@ -234,6 +233,8 @@ export function useDeviceStatus() {
   const isDeviceOnline = computed(() => deviceStatus.value.isOnline)
 
   return {
+    token,
+    deviceId,
     // 状态
     deviceStatus,
     deviceInfo,

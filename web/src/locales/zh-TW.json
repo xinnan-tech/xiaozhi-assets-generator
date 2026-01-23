@@ -136,17 +136,20 @@
   "flashProgress": {
     "authTokenMissing": "未找到認證令牌",
     "checkingDeviceStatus": "檢查設備狀態...",
-    "deviceOfflineOrUnresponsive": "設備離線或無響應: {error}",
+    "deviceOfflineOrUnresponsive": "設備不存在或不線上",
     "unableToGetDeviceStatus": "無法獲取設備狀態",
     "initializingTransferService": "初始化傳輸服務...",
     "initializeTransferFailed": "初始化傳輸服務失敗: {error}",
+    "uploadingFile": "上傳文件中...",
+    "uploadFailed": "上傳文件失敗",
     "settingDeviceDownloadUrl": "設置設備下載URL...",
     "setDownloadUrlFailed": "設置下載URL失敗: {error}",
     "rebootingDevice": "重啟設備...",
     "waitingForDeviceReboot": "等待設備重啟...",
     "deviceRebootTimeout": "等待設備重啟超時（60秒）",
+    "deviceReady": "设备就绪，请等待程序烧录",
     "startingFileTransfer": "開始檔案傳輸...",
-    "flashCompleted": "燒錄完成！",
+    "flashCompleted": "程式燒錄中，請留意固件的燒錄狀態！",
     "onlineFlashFailed": "線上燒錄失敗: {error}"
   },
   "device": {
