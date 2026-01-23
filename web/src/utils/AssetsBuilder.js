@@ -421,11 +421,20 @@ class AssetsBuilder {
         throw new Error('Incompatible emoji data structure: Missing fileMap or emotionMap. Please reconfigure emojis.')
       }
       
+      // 使用固定的表情顺序，与预设表情包保持一致
+      const presetEmojis = [
+        'neutral', 'happy', 'laughing', 'funny', 'sad', 'angry', 'crying',
+        'loving', 'embarrassed', 'surprised', 'shocked', 'thinking', 'winking',
+        'cool', 'relaxed', 'delicious', 'kissy', 'confident', 'sleepy', 'silly', 'confused'
+      ]
+      
       // 创建 hash 到文件名的映射（用于去重）
       const hashToFilename = new Map()
       
-      Object.entries(emotionMap).forEach(([emotionName, fileHash]) => {
-        const file = fileMap[fileHash]
+      presetEmojis.forEach(emotionName => {
+        const fileHash = emotionMap[emotionName]
+        const file = fileHash ? fileMap[fileHash] : null
+        
         if (file) {
           // 为每个唯一的文件 hash 生成一个共享的文件名
           if (!hashToFilename.has(fileHash)) {
