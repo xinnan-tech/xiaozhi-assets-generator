@@ -226,10 +226,50 @@ const emit = defineEmits(['update:modelValue'])
  */
 const calculateFileHash = async (file) => {
   const buffer = await file.arrayBuffer()
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-  return hashHex
+  
+  try {
+    // 优先使用 Web Crypto API（安全上下文）
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', buffer)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+      return hashHex
+    } else {
+      // 降级方案：使用简单的哈希算法（非安全上下文）
+      return calculateSimpleHash(buffer)
+    }
+  } catch (error) {
+    console.warn('Web Crypto API 不可用，使用降级哈希方案:', error)
+    return calculateSimpleHash(buffer)
+  }
+}
+
+/**
+ * 简单的文件哈希算法（用于非安全上下文）
+ * @param {ArrayBuffer} buffer - 文件数据
+ * @returns {string} 文件的 hash 值
+ */
+const calculateSimpleHash = (buffer) => {
+  const view = new Uint8Array(buffer)
+  let hash = 0
+  
+  for (let i = 0; i < view.length; i++) {
+    hash = ((hash << 5) - hash) + view[i]
+    hash = hash & hash // 转换为 32 位整数
+  }
+  
+  // 转换为 64 位十六进制字符串
+  let hashHex = Math.abs(hash).toString(16)
+  // 确保长度一致
+  while (hashHex.length < 16) {
+    hashHex = '0' + hashHex
+  }
+  
+  // 添加文件大小和时间戳，增加唯一性
+  const fileSize = buffer.byteLength.toString(16)
+  const timestamp = Date.now().toString(16)
+  
+  return (hashHex + fileSize + timestamp).slice(0, 64)
 }
 
 const presetEmojis = [
