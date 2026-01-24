@@ -220,56 +220,58 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 /**
- * 计算文件的 SHA-256 hash
+ * 计算文件的哈希值
+ * 支持安全上下文（HTTPS）和非安全上下文（HTTP）
  * @param {File} file - 文件对象
  * @returns {Promise<string>} 文件的 hash 值
  */
 const calculateFileHash = async (file) => {
   const buffer = await file.arrayBuffer()
   
-  try {
-    // 优先使用 Web Crypto API（安全上下文）
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
-      const hashBuffer = await window.crypto.subtle.digest('SHA-256', buffer)
+  // 尝试使用 crypto.subtle.digest（安全上下文）
+  if (crypto?.subtle?.digest) {
+    try {
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
       const hashArray = Array.from(new Uint8Array(hashBuffer))
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-      return hashHex
-    } else {
-      // 降级方案：使用简单的哈希算法（非安全上下文）
-      return calculateSimpleHash(buffer)
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    } catch (error) {
+      console.warn('使用 crypto.subtle.digest 失败，回退到自定义哈希函数:', error)
     }
-  } catch (error) {
-    console.warn('Web Crypto API 不可用，使用降级哈希方案:', error)
-    return calculateSimpleHash(buffer)
   }
+  
+  // 回退到自定义哈希函数（非安全上下文）
+  return customHash(buffer)
 }
 
 /**
- * 简单的文件哈希算法（用于非安全上下文）
- * @param {ArrayBuffer} buffer - 文件数据
- * @returns {string} 文件的 hash 值
+ * 自定义哈希函数，不依赖 crypto.subtle
+ * 使用改进的算法生成更唯一的哈希值
+ * @param {ArrayBuffer} buffer - 文件的 ArrayBuffer
+ * @returns {string} 哈希值
  */
-const calculateSimpleHash = (buffer) => {
-  const view = new Uint8Array(buffer)
-  let hash = 0
+const customHash = (buffer) => {
+  const bytes = new Uint8Array(buffer)
+  let hash1 = 0x811c9dc5 // FNV-1a 初始值
+  let hash2 = 0x01000193 // FNV-1a 质数
   
-  for (let i = 0; i < view.length; i++) {
-    hash = ((hash << 5) - hash) + view[i]
-    hash = hash & hash // 转换为 32 位整数
+  // 使用 FNV-1a 算法计算哈希
+  for (let i = 0; i < bytes.length; i++) {
+    hash1 = (hash1 ^ bytes[i]) * hash2
+    // 避免溢出，将结果限制在 32 位范围内
+    hash1 = hash1 & 0xffffffff
   }
   
-  // 转换为 64 位十六进制字符串
-  let hashHex = Math.abs(hash).toString(16)
-  // 确保长度一致
-  while (hashHex.length < 16) {
-    hashHex = '0' + hashHex
+  // 再使用一个简单的算法计算第二个哈希值
+  let hash3 = 0
+  for (let i = 0; i < bytes.length; i++) {
+    hash3 = (hash3 * 31 + bytes[i]) & 0xffffffff
   }
   
-  // 添加文件大小和时间戳，增加唯一性
-  const fileSize = buffer.byteLength.toString(16)
-  const timestamp = Date.now().toString(16)
+  // 合并两个哈希值，生成更唯一的 32 位哈希
+  const finalHash = (hash1 ^ hash3) >>> 0
   
-  return (hashHex + fileSize + timestamp).slice(0, 64)
+  // 转换为 8 位十六进制字符串，确保唯一性
+  return finalHash.toString(16).padStart(8, '0')
 }
 
 const presetEmojis = [
