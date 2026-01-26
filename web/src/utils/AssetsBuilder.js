@@ -15,6 +15,7 @@ import WakenetModelPacker from './WakenetModelPacker.js'
 import SpiffsGenerator from './SpiffsGenerator.js'
 import WasmGifScaler from './WasmGifScaler.js'
 import configStorage from './ConfigStorage.js'
+import StorageHelper from './StorageHelper.js'
 
 class AssetsBuilder {
   constructor() {
@@ -382,7 +383,11 @@ class AssetsBuilder {
    * 获取表情集合信息
    * @returns {Array} 表情集合信息数组
    */
-  getEmojiCollectionInfo() {
+  /**
+   * 获取表情集合信息
+   * 如果文件从存储恢复后为 null，则尝试从 IndexedDB 恢复
+   */
+  async getEmojiCollectionInfo() {
     if (!this.config || !this.config.theme || !this.config.theme.emoji) {
       return []
     }
@@ -424,8 +429,15 @@ class AssetsBuilder {
       // 创建 hash 到文件名的映射（用于去重）
       const hashToFilename = new Map()
       
-      Object.entries(emotionMap).forEach(([emotionName, fileHash]) => {
-        const file = fileMap[fileHash]
+      for (const [emotionName, fileHash] of Object.entries(emotionMap)) {
+        let file = fileMap[fileHash]
+        
+        // 如果文件为 null，尝试从 IndexedDB 恢复
+        if (!file) {
+          console.log(`Restoring emoji file from storage: ${emotionName} (hash: ${fileHash.substring(0, 8)})`)
+          file = await StorageHelper.restoreEmojiFile(`hash_${fileHash}`)
+        }
+        
         if (file) {
           // 为每个唯一的文件 hash 生成一个共享的文件名
           if (!hashToFilename.has(fileHash)) {
@@ -444,8 +456,10 @@ class AssetsBuilder {
             fileHash,  // 保留 hash 信息用于去重处理
             size: { ...size }
           })
+        } else {
+          console.warn(`Failed to restore emoji file: ${emotionName} (hash: ${fileHash.substring(0, 8)})`)
         }
-      })
+      }
       
       console.log(`Emoji deduplication: ${Object.keys(emotionMap).length} emojis using ${hashToFilename.size} different image files`)
       
@@ -499,9 +513,9 @@ class AssetsBuilder {
 
   /**
    * 生成 index.json 内容
-   * @returns {Object} index.json 对象
+   * @returns {Promise<Object>} index.json 对象
    */
-  generateIndexJson() {
+  async generateIndexJson() {
     if (!this.config) {
       throw new Error('Configuration object not set')
     }
@@ -554,7 +568,7 @@ class AssetsBuilder {
     }
 
     // 添加表情集合
-    const emojiCollection = this.getEmojiCollectionInfo()
+    const emojiCollection = await this.getEmojiCollectionInfo()
     if (emojiCollection.length > 0) {
       indexData.emoji_collection = emojiCollection.map(emoji => ({
         name: emoji.name,
@@ -567,12 +581,12 @@ class AssetsBuilder {
 
   /**
    * 准备打包资源
-   * @returns {Object} 打包资源清单
+   * @returns {Promise<Object>} 打包资源清单
    */
-  preparePackageResources() {
+  async preparePackageResources() {
     const resources = {
       files: [],
-      indexJson: this.generateIndexJson(),
+      indexJson: await this.generateIndexJson(),
       config: { ...this.config }
     }
 
@@ -600,7 +614,7 @@ class AssetsBuilder {
     }
 
     // 添加表情文件（去重处理）
-    const emojiCollection = this.getEmojiCollectionInfo()
+    const emojiCollection = await this.getEmojiCollectionInfo()
     const addedFileHashes = new Set()  // 跟踪已添加的文件 hash
     
     emojiCollection.forEach(emoji => {
@@ -721,7 +735,7 @@ class AssetsBuilder {
       await new Promise(resolve => setTimeout(resolve, 100))
       if (progressCallback) progressCallback(40, 'Preparing resource files...')
       
-      const resources = this.preparePackageResources()
+      const resources = await this.preparePackageResources()
       
       // 清理生成器状态
       this.wakenetPacker.clear()
@@ -1428,9 +1442,9 @@ class AssetsBuilder {
    * 获取资源清单用于显示
    * @returns {Array} 资源清单
    */
-  getResourceSummary() {
+  async getResourceSummary() {
     const summary = []
-    const resources = this.preparePackageResources()
+    const resources = await this.preparePackageResources()
     
     // 统计各类资源
     const counts = {

@@ -81,7 +81,6 @@
       @close="showGenerateModal = false"
       @generate="handleModalGenerate"
       @startFlash="handleStartFlash"
-      @cancelFlash="handleCancelFlash"
     />
 
     <!-- Reset Confirmation Modal -->
@@ -98,17 +97,17 @@ import GenerateSummary from '@/components/GenerateSummary.vue'
 import GenerateModal from '@/components/GenerateModal.vue'
 import configStorage from '@/utils/ConfigStorage.js'
 import AssetsBuilder from '@/utils/AssetsBuilder.js'
-import WebSocketTransfer from '@/utils/WebSocketTransfer.js'
 import { useDeviceStatus } from '@/composables/useDeviceStatus.js'
 
 // 使用共享的设备状态
-const {
-  callMcpTool: callDeviceMcpTool
-} = useDeviceStatus()
+const deviceStatus = useDeviceStatus();
 
 // 使用国际化
 const { t } = useI18n()
 
+// 设置定时获取设备状态次数
+const maxGetStatusCount = ref(30)
+const timer = ref(null)
 const currentStep = ref(0)
 const showGenerateModal = ref(false)
 const activeThemeTab = ref('wakeword') // 保持主题设计页面的tab状态
@@ -120,7 +119,7 @@ const isResetting = ref(false)
 const isLoading = ref(true)
 const assetsBuilder = new AssetsBuilder()
 const autoHideTimer = ref(null) // 新增：自动隐藏定时器
-const webSocketTransfer = ref(null) // WebSocket传输实例
+const assetsBinUrl = ref('');
 
 // 注意：由于在setup函数外部，我们需要在这里定义一个函数来获取翻译
 // 或者我们可以将这个移到setup函数内部
@@ -224,146 +223,96 @@ const handleModalGenerate = async (selectedItems) => {
   // TODO: 实现实际的生成逻辑
 }
 
-// 获取URL参数中的token
-const getToken = () => {
-  const urlParams = new URLSearchParams(window.location.search)
-  return urlParams.get('token')
-}
-
 // 调用MCP工具（使用共享的方法）
 const callMcpTool = async (toolName, params = {}) => {
-  return await callDeviceMcpTool(toolName, params)
+  return await deviceStatus.callMcpTool(toolName, params)
 }
 
 // 处理开始在线烧录
 const handleStartFlash = async (flashData) => {
   const { blob, onProgress, onComplete, onError } = flashData
-
   try {
-    const token = getToken()
-    if (!token) {
-      throw new Error(t('flashProgress.authTokenMissing'))
-    }
-
     // 步骤1: 检查设备状态
-    onProgress(5, t('flashProgress.checkingDeviceStatus'))
+    onProgress(15, t('flashProgress.checkingDeviceStatus'))
     try {
       const deviceStatus = await callMcpTool('self.get_device_status')
-      if (!deviceStatus) {
+      if (deviceStatus.code !== 0) {
         throw new Error(t('flashProgress.deviceOfflineOrUnresponsive', { error: t('flashProgress.unableToGetDeviceStatus') }))
       }
     } catch (error) {
       console.error('检查设备状态失败:', error)
-      onError(t('flashProgress.deviceOfflineOrUnresponsive', { error: error.message }))
+      onError(t('flashProgress.deviceOfflineOrUnresponsive', { error: error.msg }))
       return
     }
-
-    // 步骤2: 初始化WebSocket传输并获取下载URL
-    onProgress(15, t('flashProgress.initializingTransferService'))
-    webSocketTransfer.value = new WebSocketTransfer(token)
-
-    // 创建一个Promise来等待下载URL准备好
-    let downloadUrlReady = null
-    const downloadUrlPromise = new Promise((resolve, reject) => {
-      downloadUrlReady = resolve
-    })
-
-    // 创建一个Promise来等待transfer_started事件
-    let transferStartedResolver = null
-    const transferStartedPromise = new Promise((resolve, reject) => {
-      transferStartedResolver = resolve
-    })
-
-    // 初始化WebSocket会话（只建立连接和获取URL）
-    webSocketTransfer.value.onTransferStarted = () => {
-      // 当收到transfer_started事件时，resolve等待的Promise
-      if (transferStartedResolver) {
-        transferStartedResolver()
-        transferStartedResolver = null
-      }
-    }
-
-    await webSocketTransfer.value.initializeSession(
-      blob,
-      (progress, step) => {
-        // 初始化进度：15-30
-        onProgress(15 + progress * 0.75, step)
-      },
-      (error) => {
-        console.error('WebSocket初始化失败:', error)
-        onError(t('flashProgress.initializeTransferFailed', { error: error.message }))
-      },
-      (downloadUrl) => {
-        downloadUrlReady(downloadUrl)
-      }
-    )
-
-    // 等待下载URL准备好
-    const downloadUrl = await downloadUrlPromise
-
-    // 步骤3: 设置设备的下载URL
-    onProgress(30, t('flashProgress.settingDeviceDownloadUrl'))
+    // 步骤2: 传输文件并获取下载URL
+    onProgress(30, t('flashProgress.uploadingFile'))
     try {
-      await callMcpTool('self.assets.set_download_url', {
-        url: downloadUrl
+      const formData = new FormData();
+      formData.append('file', blob, 'assets.bin');
+      const response = await fetch('/xiaozhi/otaMag/uploadAssetsBin', {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${deviceStatus.token.value}`
+        }
       })
+
+      const res = await response.json();
+      if (res.code !== 0) {
+        await Promise.reject(res);
+      }
+      assetsBinUrl.value = res.data;
+    } catch (error) {
+      onError(t('flashProgress.uploadFailed'))
+      return;
+    }
+    // 步骤3: 设置设备的下载URL
+    onProgress(45, t('flashProgress.settingDeviceDownloadUrl'))
+    try {
+      const res = await callMcpTool('self.assets.set_download_url', {
+        url: assetsBinUrl.value
+      })
+      if (res.code !== 0) {
+        await Promise.reject(res);
+      }
     } catch (error) {
       console.error('设置下载URL失败:', error)
-      onError(t('flashProgress.setDownloadUrlFailed', { error: error.message }))
+      onError(t('flashProgress.setDownloadUrlFailed', { error: error.msg }))
       return
     }
-
     // 步骤4: 重启设备
-    onProgress(40, t('flashProgress.rebootingDevice'))
+    onProgress(60, t('flashProgress.waitingForDeviceReboot'))
     // reboot指令没有返回值，不需要等待，直接调用
-    callMcpTool('self.reboot').catch(error => {
+    await callMcpTool('self.reboot').catch(error => {
       console.warn('reboot指令调用警告（设备可能已重启）:', error)
       // 即使reboot失败，也继续流程，因为设备可能已经重启
     })
-
     // 步骤5: 等待设备重启并建立HTTP连接（通过transfer_started事件）
-    onProgress(50, t('flashProgress.waitingForDeviceReboot'))
-
-    // 等待transfer_started事件，设置60秒超时
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(t('flashProgress.deviceRebootTimeout'))), 60000)
-    })
-
-    await Promise.race([transferStartedPromise, timeoutPromise])
-
-    // 步骤6: 开始实际的文件传输
-    onProgress(60, t('flashProgress.startingFileTransfer'))
-
-    // 设备已准备好，直接开始传输（transfer_started已收到，sendFileData会立即执行）
-    await webSocketTransfer.value.startTransfer(
-      (progress, step) => {
-        // 文件传输进度：60-100
-        const adjustedProgress = 60 + (progress * 0.4)
-        onProgress(Math.round(adjustedProgress), step)
-      },
-      (error) => {
-        onError(t('flashProgress.onlineFlashFailed', { error: error.message }))
-      },
-      () => {
-        onComplete()
+    onProgress(75, t('flashProgress.deviceReady'));
+    // 步骤7：定时调用接口获取设备的在线状态
+    timer.value = setInterval(() => {
+      onProgress(90, t('flashProgress.flashCompleted'))
+      maxGetStatusCount.value -= 1;
+      if (maxGetStatusCount.value <= 0) {
+        clearInterval(timer.value)
+        maxGetStatusCount.value = 30
+        timer.value = null;
+        onError("请求超时，请检查设备烧录是否异常");
+        return;
       }
-    )
-
-    // 清理回调引用
-    webSocketTransfer.value.onTransferStarted = null
+      callMcpTool('self.get_device_status').then(deviceStatus => {
+        if (timer.value && deviceStatus.code === 0) {
+          clearInterval(timer.value)
+          timer.value = null;
+          maxGetStatusCount.value = 30
+          onComplete();
+        }
+      })
+    }, 5000)
 
   } catch (error) {
     console.error('在线烧录失败:', error)
-    onError(t('flashProgress.onlineFlashFailed', { error: error.message }))
-  }
-}
-
-// 处理取消烧录
-const handleCancelFlash = () => {
-  if (webSocketTransfer.value) {
-    webSocketTransfer.value.cancel()
-    webSocketTransfer.value.destroy()
-    webSocketTransfer.value = null
+    onError(t('flashProgress.onlineFlashFailed', { error: error.msg }))
   }
 }
 
@@ -602,6 +551,7 @@ onMounted(async () => {
 onUnmounted(() => {
   if (autoHideTimer.value) {
     clearTimeout(autoHideTimer.value)
+    clearInterval(timer.value)
   }
 })
 

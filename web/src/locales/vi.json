@@ -136,17 +136,20 @@
   "flashProgress": {
     "authTokenMissing": "Không tìm thấy mã thông báo xác thực",
     "checkingDeviceStatus": "Đang kiểm tra trạng thái thiết bị...",
-    "deviceOfflineOrUnresponsive": "Thiết bị ngoại tuyến hoặc không phản hồi: {error}",
+    "deviceOfflineOrUnresponsive": "Thiết bị không tồn tại hoặc không trực tuyến",
     "unableToGetDeviceStatus": "Không thể lấy trạng thái thiết bị",
     "initializingTransferService": "Đang khởi tạo dịch vụ truyền tải...",
     "initializeTransferFailed": "Khởi tạo dịch vụ truyền tải thất bại: {error}",
+    "uploadingFile": "Tải lên tập tin. .....",
+    "uploadFailed": "Tải lên tập tin không thành công",
     "settingDeviceDownloadUrl": "Đang thiết lập URL tải xuống thiết bị...",
     "setDownloadUrlFailed": "Thiết lập URL tải xuống thất bại: {error}",
     "rebootingDevice": "Đang khởi động lại thiết bị...",
     "waitingForDeviceReboot": "Đang chờ thiết bị khởi động lại...",
     "deviceRebootTimeout": "Hết thời gian chờ thiết bị khởi động lại (60 giây)",
+    "deviceReady": "Thiết bị đã sẵn sàng, vui lòng chờ chương trình ghi",
     "startingFileTransfer": "Đang bắt đầu truyền tải tệp...",
-    "flashCompleted": "Flash hoàn thành!",
+    "flashCompleted": "Trong quá trình ghi âm chương trình, xin lưu ý trạng thái ghi âm của phần cố định!",
     "onlineFlashFailed": "Flash trực tuyến thất bại: {error}"
   },
   "device": {

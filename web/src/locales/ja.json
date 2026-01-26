@@ -136,17 +136,20 @@
   "flashProgress": {
     "authTokenMissing": "認証トークンが見つかりません",
     "checkingDeviceStatus": "デバイスの状態を確認中...",
-    "deviceOfflineOrUnresponsive": "デバイスがオフラインまたは応答なし: {error}",
+    "deviceOfflineOrUnresponsive": "デバイスが存在しないか、オンラインではありません",
     "unableToGetDeviceStatus": "デバイスの状態を取得できません",
     "initializingTransferService": "転送サービスを初期化中...",
     "initializeTransferFailed": "転送サービスの初期化に失敗しました: {error}",
+    "uploadingFile": "ファイルをアップロード中...",
+    "uploadFailed": "ファイルのアップロードに失敗しました",
     "settingDeviceDownloadUrl": "デバイスダウンロードURLを設定中...",
     "setDownloadUrlFailed": "ダウンロードURLの設定に失敗しました: {error}",
     "rebootingDevice": "デバイスを再起動中...",
     "waitingForDeviceReboot": "デバイスの再起動を待機中...",
     "deviceRebootTimeout": "デバイスの再起動タイムアウト（60秒）",
+    "deviceReady": "デバイスが準備できました。プログラムの書き込みをお待ちください",
     "startingFileTransfer": "ファイル転送を開始中...",
-    "flashCompleted": "書き込み完了!",
+    "flashCompleted": "プログラムの書き込み中、ファームウェアの書き込み状態に注意してください！",
     "onlineFlashFailed": "オンライン書き込みに失敗しました: {error}"
   },
   "device": {

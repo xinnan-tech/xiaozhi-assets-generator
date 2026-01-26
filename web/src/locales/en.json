@@ -136,17 +136,20 @@
   "flashProgress": {
     "authTokenMissing": "Authentication token not found",
     "checkingDeviceStatus": "Checking device status...",
-    "deviceOfflineOrUnresponsive": "Device offline or unresponsive: {error}",
+    "deviceOfflineOrUnresponsive": "The device does not exist or is not online",
     "unableToGetDeviceStatus": "Unable to get device status",
     "initializingTransferService": "Initializing transfer service...",
     "initializeTransferFailed": "Failed to initialize transfer service: {error}",
+    "uploadingFile": "Upload the file ...",
+    "uploadFailed": "Upload file failed",
     "settingDeviceDownloadUrl": "Setting device download URL...",
     "setDownloadUrlFailed": "Failed to set download URL: {error}",
     "rebootingDevice": "Rebooting device...",
     "waitingForDeviceReboot": "Waiting for device to reboot...",
     "deviceRebootTimeout": "Device reboot timeout (60 seconds)",
+    "deviceReady": "Device ready, please wait for program burning",
     "startingFileTransfer": "Starting file transfer...",
-    "flashCompleted": "Flashing completed!",
+    "flashCompleted": "During program burning, please pay attention to the firmware burning status!",
     "onlineFlashFailed": "Online flashing failed: {error}"
   },
   "device": {

@@ -94,17 +94,20 @@
   "flashProgress": {
     "authTokenMissing": "未找到认证令牌",
     "checkingDeviceStatus": "检查设备状态...",
-    "deviceOfflineOrUnresponsive": "设备离线或无响应: {error}",
+    "deviceOfflineOrUnresponsive": "设备不存在或不在线",
     "unableToGetDeviceStatus": "无法获取设备状态",
     "initializingTransferService": "初始化传输服务...",
     "initializeTransferFailed": "初始化传输服务失败: {error}",
+    "uploadingFile": "上传文件中...",
+    "uploadFailed": "上传文件失败",
     "settingDeviceDownloadUrl": "设置设备下载URL...",
     "setDownloadUrlFailed": "设置下载URL失败: {error}",
     "rebootingDevice": "重启设备...",
     "waitingForDeviceReboot": "等待设备重启...",
     "deviceRebootTimeout": "等待设备重启超时（60秒）",
+    "deviceReady": "设备就绪，请等待程序烧录",
     "startingFileTransfer": "开始传输文件...",
-    "flashCompleted": "烧录完成！",
+    "flashCompleted": "程序烧录中，请留意固件的烧录状态！",
     "onlineFlashFailed": "在线烧录失败: {error}"
   },
   "device": {

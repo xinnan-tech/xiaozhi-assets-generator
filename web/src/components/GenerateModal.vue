@@ -150,7 +150,7 @@
 
             <button
               @click="startOnlineFlash"
-              :disabled="!deviceOnline"
+              :disabled="!isDeviceOnline"
               class="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
             >
               <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -181,14 +181,6 @@
               <div class="mt-1">{{ $t('generateModal.progress', { progress: flashProgress }) }}</div>
             </div>
           </div>
-
-          <!-- 取消按钮 -->
-          <button
-            @click="cancelFlash"
-            class="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
-          >
-            {{ $t('generateModal.flashingCancel') }}
-          </button>
         </div>
 
         <!-- 烧录失败错误提示 -->
@@ -241,10 +233,10 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'generate', 'startFlash', 'cancelFlash'])
+const emit = defineEmits(['close', 'generate', 'startFlash'])
 
 // 获取设备状态
-const { deviceInfo } = useDeviceStatus()
+const { deviceInfo, checkDeviceStatus, isDeviceOnline } = useDeviceStatus()
 
 const isGenerating = ref(false)
 const isCompleted = ref(false)
@@ -254,7 +246,6 @@ const generatedFileSize = ref('')
 const generationTime = ref('')
 const generatedBlob = ref(null)
 const generationStartTime = ref(null)
-const deviceOnline = ref(false)
 const isFlashing = ref(false)
 const flashProgress = ref(0)
 const flashCurrentStep = ref('')
@@ -645,33 +636,6 @@ const downloadFile = () => {
   }
 }
 
-// 检查设备在线状态
-const checkDeviceOnline = async () => {
-  try {
-    // 获取URL参数中的token
-    const urlParams = new URLSearchParams(window.location.search)
-    const token = urlParams.get('token')
-
-    if (!token) {
-      deviceOnline.value = false
-      return
-    }
-
-    const response = await fetch('/api/messaging/device/tools/list', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    })
-
-    deviceOnline.value = response.ok
-  } catch (error) {
-    console.error(t('flashProgress.unableToGetDeviceStatus'), error)
-    deviceOnline.value = false
-  }
-}
-
 // 开始在线烧录
 const startOnlineFlash = async () => {
   if (!generatedBlob.value) {
@@ -679,7 +643,7 @@ const startOnlineFlash = async () => {
     return
   }
 
-  if (!deviceOnline.value) {
+  if (!isDeviceOnline.value) {
     alert(t('errors.deviceOffline'))
     return
   }
@@ -728,20 +692,8 @@ const startOnlineFlash = async () => {
   }
 }
 
-// 取消烧录
-const cancelFlash = () => {
-  if (confirm(t('errors.flashCancelConfirm'))) {
-    isFlashing.value = false
-    flashProgress.value = 0
-    flashCurrentStep.value = ''
-    flashError.value = ''
-    emit('cancelFlash')
-  }
-}
-
-
 onMounted(async () => {
   initializeFileList()
-  await checkDeviceOnline()
+  await checkDeviceStatus(false);
 })
 </script>
