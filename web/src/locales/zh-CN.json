@@ -22,7 +22,8 @@
     "finish": "完成",
     "retry": "重试",
     "ok": "确定",
-    "other": "其他"
+    "other": "其他",
+    "back": "返回"
   },
   "header": {
     "title": "小智 AI 自定义"

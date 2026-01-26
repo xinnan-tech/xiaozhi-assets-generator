@@ -22,7 +22,8 @@
     "finish": "完了",
     "retry": "再試行",
     "ok": "OK",
-    "other": "その他"
+    "other": "その他",
+    "back": "戻る"
   },
   "header": {
     "title": "小智 AI カスタマイズ"
