@@ -15,7 +15,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/xiaozhi': {
-        target: 'http://test.aiot.xin-nan.com',
+        target: 'http://127.0.0.1:8002',
         changeOrigin: true
       }
     }
