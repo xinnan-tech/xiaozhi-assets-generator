@@ -58,7 +58,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { languageOptions } from '@/locales'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const isOpen = ref(false)
 
 const currentLanguage = computed(() => {
@@ -77,6 +77,7 @@ const selectLanguage = (langCode) => {
   locale.value = langCode
   // 保存语言选择到localStorage
   localStorage.setItem('user-language', langCode)
+  document.title = t('app.title')
   closeDropdown()
 }
 

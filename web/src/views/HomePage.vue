@@ -106,7 +106,8 @@ const deviceStatus = useDeviceStatus();
 const { t } = useI18n()
 
 // 设置定时获取设备状态次数
-const maxGetStatusCount = ref(30)
+const MAX_GET_STATUS_COUNT = 60
+const requestCount = ref(MAX_GET_STATUS_COUNT)
 const timer = ref(null)
 const currentStep = ref(0)
 const showGenerateModal = ref(false)
@@ -292,10 +293,10 @@ const handleStartFlash = async (flashData) => {
     // 步骤7：定时调用接口获取设备的在线状态
     timer.value = setInterval(() => {
       onProgress(90, t('flashProgress.flashCompleted'))
-      maxGetStatusCount.value -= 1;
-      if (maxGetStatusCount.value <= 0) {
+      requestCount.value -= 1;
+      if (requestCount.value <= 0) {
         clearInterval(timer.value)
-        maxGetStatusCount.value = 30
+        requestCount.value = MAX_GET_STATUS_COUNT
         timer.value = null;
         onError("请求超时，请检查设备烧录是否异常");
         return;
@@ -304,7 +305,7 @@ const handleStartFlash = async (flashData) => {
         if (timer.value && deviceStatus.code === 0) {
           clearInterval(timer.value)
           timer.value = null;
-          maxGetStatusCount.value = 30
+          requestCount.value = MAX_GET_STATUS_COUNT
           onComplete();
         }
       })

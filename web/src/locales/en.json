@@ -22,7 +22,8 @@
     "finish": "Finish",
     "retry": "Retry",
     "ok": "OK",
-    "other": "Other"
+    "other": "Other",
+    "back": "Go Back"
   },
   "header": {
     "title": "Xiaozhi AI Customization"
