@@ -403,13 +403,21 @@ class AssetsBuilder {
         'cool', 'relaxed', 'delicious', 'kissy', 'confident', 'sleepy', 'silly', 'confused'
       ]
       
-      const size = emoji.preset === 'twemoji32' ? '32' : '64'
+      // Preset emoji pack configurations
+      const presetConfigs = {
+        'twemoji32': { size: 32, format: 'png' },
+        'twemoji64': { size: 64, format: 'png' },
+        'noto-emoji_64': { size: 64, format: 'gif' },
+        'noto-emoji_128': { size: 128, format: 'gif' }
+      }
+      
+      const config = presetConfigs[emoji.preset] || { size: 64, format: 'png' }
       presetEmojis.forEach(name => {
         collection.push({
           name,
-          file: `${name}.png`,
+          file: `${name}.${config.format}`,
           source: `preset:${emoji.preset}`,
-          size: { width: parseInt(size), height: parseInt(size) }
+          size: { width: config.size, height: config.size }
         })
       })
     } else if (emoji.type === 'custom') {
@@ -1097,13 +1105,22 @@ class AssetsBuilder {
 
   /**
    * 加载预设表情
-   * @param {string} presetName - 预设名称 (twemoji32/twemoji64)
+   * @param {string} presetName - 预设名称 (twemoji32/twemoji64/noto-emoji_64/noto-emoji_128)
    * @param {string} emojiName - 表情名称
    * @returns {Promise<ArrayBuffer>} 表情数据
    */
   async loadPresetEmoji(presetName, emojiName) {
     try {
-      const response = await fetch(`./static/${presetName}/${emojiName}.png`)
+      // Determine file format based on preset name
+      const presetConfigs = {
+        'twemoji32': 'png',
+        'twemoji64': 'png',
+        'noto-emoji_64': 'gif',
+        'noto-emoji_128': 'gif'
+      }
+      const format = presetConfigs[presetName] || 'png'
+      
+      const response = await fetch(`./static/emojis/${presetName}/${emojiName}.${format}`)
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`)
       }

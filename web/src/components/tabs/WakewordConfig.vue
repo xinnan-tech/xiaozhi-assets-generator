@@ -217,6 +217,7 @@ const wakewordData = [
   { id: 'wn9_bluechip_tts2', name: 'Blue Chip', model: 'WakeNet9' },
   { id: 'wn9_hiandy_tts2', name: 'Hi,Andy', model: 'WakeNet9' },
   { id: 'wn9_heyivy_tts2', name: 'Hey,Ivy', model: 'WakeNet9' },
+  { id: 'wn9_histackchan_tts3', name: 'Hi,Stack Chan', model: 'WakeNet9' },
   { id: 'wn9_hiwalle_tts2', name: 'Hi,Wall E', model: 'WakeNet9' },
   { id: 'wn9_nihaoxiaoxin_tts', name: '你好小鑫', model: 'WakeNet9' },
   { id: 'wn9_xiaomeitongxue_tts', name: '小美同学', model: 'WakeNet9' },
@@ -243,7 +244,9 @@ const wakewordData = [
   { id: 'wn9_nihaoxiaoan_tts2', name: '你好小安', model: 'WakeNet9' },
   { id: 'wn9_ni3hao3xiao3mai4_tts2', name: '你好小脉', model: 'WakeNet9' },
   { id: 'wn9_ni3hao3xiao3rui4_tts3', name: '你好小瑞', model: 'WakeNet9' },
-  { id: 'wn9_hai1xiao3ou1_tts3', name: '嗨小欧', model: 'WakeNet9' }
+  { id: 'wn9_hai1xiao3ou1_tts3', name: '嗨小欧', model: 'WakeNet9' },
+  { id: 'wn9_xiao3jia1xiao3jia1_tts3', name: '小珈小珈', model: 'WakeNet9' },
+  { id: 'wn9_xiao3feng1xiao3feng1_tts3', name: '小峰小峰', model: 'WakeNet9' }
 ]
 
 // 判断芯片是否支持 WakeNet9

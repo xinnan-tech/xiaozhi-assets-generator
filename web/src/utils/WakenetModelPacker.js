@@ -262,42 +262,6 @@ class WakenetModelPacker {
   }
 
   /**
-   * 获取可用的模型列表
-   * @returns {Promise<Array>} 模型列表
-   */
-  static async getAvailableModels() {
-    try {
-      // 尝试获取模型列表的几种方式
-      const wn9Models = [
-        'wn9_alexa', 'wn9_astrolabe_tts', 'wn9_bluechip_tts2', 'wn9_computer_tts',
-        'wn9_haixiaowu_tts', 'wn9_heyily_tts2', 'wn9_heyprinter_tts', 'wn9_heywanda_tts',
-        'wn9_heywillow_tts', 'wn9_hiesp', 'wn9_hifairy_tts2', 'wn9_hijason_tts2',
-        'wn9_hijolly_tts2', 'wn9_hijoy_tts', 'wn9_hilexin', 'wn9_hilili_tts',
-        'wn9_himfive', 'wn9_himiaomiao_tts', 'wn9_hitelly_tts', 'wn9_hiwalle_tts2',
-        'wn9_hixiaoxing_tts', 'wn9_jarvis_tts', 'wn9_linaiban_tts2', 'wn9_miaomiaotongxue_tts',
-        'wn9_mycroft_tts', 'wn9_nihaobaiying_tts2', 'wn9_nihaodongdong_tts2', 'wn9_nihaomiaoban_tts2',
-        'wn9_nihaoxiaoan_tts2', 'wn9_nihaoxiaoxin_tts', 'wn9_nihaoxiaoyi_tts2', 'wn9_nihaoxiaozhi',
-        'wn9_nihaoxiaozhi_tts', 'wn9_sophia_tts', 'wn9_xiaoaitongxue', 'wn9_xiaobinxiaobin_tts',
-        'wn9_xiaojianxiaojian_tts2', 'wn9_xiaokangtongxue_tts2', 'wn9_xiaolongxiaolong_tts',
-        'wn9_xiaoluxiaolu_tts2', 'wn9_xiaomeitongxue_tts', 'wn9_xiaomingtongxue_tts2',
-        'wn9_xiaosurou_tts2', 'wn9_xiaotexiaote_tts2', 'wn9_xiaoyaxiaoya_tts2', 'wn9_xiaoyutongxue_tts2'
-      ]
-
-      const wn9sModels = [
-        'wn9s_alexa', 'wn9s_hiesp', 'wn9s_hijason', 'wn9s_hilexin', 'wn9s_nihaoxiaozhi'
-      ]
-
-      return {
-        WakeNet9: wn9Models,
-        WakeNet9s: wn9sModels
-      }
-    } catch (error) {
-      console.error('获取模型列表失败:', error)
-      return { WakeNet9: [], WakeNet9s: [] }
-    }
-  }
-
-  /**
    * 验证模型名称是否有效
    * @param {string} modelName - 模型名称
    * @param {string} chipModel - 芯片型号

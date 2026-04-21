@@ -297,12 +297,20 @@ const getBackgroundStyle = () => {
   }
 }
 
+// 预设表情包尺寸配置
+const presetEmojiSizes = {
+  'twemoji32': 32,
+  'twemoji64': 64,
+  'noto-emoji_64': 64,
+  'noto-emoji_128': 128
+}
+
 // 获取表情样式
 const getEmojiStyle = () => {
   let size = 48 // 默认大小
   
   if (props.config.theme.emoji.type === 'preset') {
-    size = props.config.theme.emoji.preset === 'twemoji64' ? 64 : 32
+    size = presetEmojiSizes[props.config.theme.emoji.preset] || 32
   } else if (props.config.theme.emoji.custom.size) {
     size = Math.min(props.config.theme.emoji.custom.size.width, props.config.theme.emoji.custom.size.height)
   }
@@ -437,11 +445,20 @@ const getFontFamily = () => {
   return '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
 }
 
+// 预设表情包配置
+const presetEmojiFormats = {
+  'twemoji32': 'png',
+  'twemoji64': 'png',
+  'noto-emoji_64': 'gif',
+  'noto-emoji_128': 'gif'
+}
+
 // 获取表情图片
 const getEmotionImage = (emotionKey) => {
   if (props.config.theme.emoji.type === 'preset') {
-    const size = props.config.theme.emoji.preset === 'twemoji64' ? '64' : '32'
-    return `./static/twemoji${size}/${emotionKey}.png`
+    const presetId = props.config.theme.emoji.preset
+    const format = presetEmojiFormats[presetId] || 'png'
+    return `./static/emojis/${presetId}/${emotionKey}.${format}`
   } else if (props.config.theme.emoji.type === 'custom' && props.config.theme.emoji.custom.images[emotionKey]) {
     try {
       const emojiFile = props.config.theme.emoji.custom.images[emotionKey]
@@ -465,11 +482,11 @@ const getEmojiCharacter = (emotionKey) => {
 // 获取表情控制按钮尺寸
 const getEmojiControlSize = () => {
   if (props.config.theme.emoji.type === 'preset') {
-    const baseSize = props.config.theme.emoji.preset === 'twemoji64' ? 64 : 32
-    return baseSize + 16 // 加上padding
+    const baseSize = presetEmojiSizes[props.config.theme.emoji.preset] || 32
+    return Math.min(baseSize + 16, 80) // 加上padding，限制最大尺寸
   } else if (props.config.theme.emoji.custom.size) {
     const baseSize = Math.min(props.config.theme.emoji.custom.size.width, props.config.theme.emoji.custom.size.height)
-    return Math.min(baseSize + 16, 64) // 限制最大尺寸
+    return Math.min(baseSize + 16, 80) // 限制最大尺寸
   }
   return 48 // 默认尺寸
 }
@@ -477,9 +494,10 @@ const getEmojiControlSize = () => {
 // 获取表情图片显示尺寸
 const getEmojiDisplaySize = () => {
   if (props.config.theme.emoji.type === 'preset') {
-    return props.config.theme.emoji.preset === 'twemoji64' ? 64 : 32
+    const size = presetEmojiSizes[props.config.theme.emoji.preset] || 32
+    return Math.min(size, 64) // 限制控制面板中的显示尺寸
   } else if (props.config.theme.emoji.custom.size) {
-    return Math.min(props.config.theme.emoji.custom.size.width, props.config.theme.emoji.custom.size.height, 48)
+    return Math.min(props.config.theme.emoji.custom.size.width, props.config.theme.emoji.custom.size.height, 64)
   }
   return 32 // 默认尺寸
 }
@@ -522,7 +540,13 @@ const getFontName = () => {
 
 const getEmojiName = () => {
   if (props.config.theme.emoji.type === 'preset' && props.config.theme.emoji.preset) {
-    return props.config.theme.emoji.preset === 'twemoji64' ? 'Twemoji 64×64' : 'Twemoji 32×32'
+    const presetNames = {
+      'twemoji32': 'Twemoji 32×32',
+      'twemoji64': 'Twemoji 64×64',
+      'noto-emoji_64': 'Noto Emoji 64×64',
+      'noto-emoji_128': 'Noto Emoji 128×128'
+    }
+    return presetNames[props.config.theme.emoji.preset] || props.config.theme.emoji.preset
   } else if (props.config.theme.emoji.type === 'custom') {
     const count = Object.keys(props.config.theme.emoji.custom.images).length
     return t('generateSummary.customEmoji', { count })

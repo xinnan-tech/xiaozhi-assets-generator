@@ -304,6 +304,8 @@
     "twemojiDescription": "High-quality emoji set from Twitter, perfect for clear display",
     "twitterEmojiName": "Twemoji {size}x{size}",
     "twitterEmojiDescription": "Twitter emoji pack, {size}×{size} pixels",
+    "notoEmojiName": "Noto Emoji {size}x{size}",
+    "notoEmojiDescription": "Google Noto animated emoji pack, {size}×{size} pixels (requires PSRAM)",
     "size": "Size",
     "preview": "Preview",
     "select": "Select",

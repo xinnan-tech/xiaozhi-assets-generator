@@ -262,6 +262,8 @@
     "twemojiDescription": "来自Twitter的高质量表情符号集，适合清晰显示",
     "twitterEmojiName": "Twemoji {size}x{size}",
     "twitterEmojiDescription": "Twitter表情包，{size}×{size}像素",
+    "notoEmojiName": "Noto Emoji {size}x{size}",
+    "notoEmojiDescription": "Google Noto 动画表情包，{size}×{size}像素（需要 PSRAM）",
     "size": "尺寸",
     "preview": "预览",
     "select": "选择",

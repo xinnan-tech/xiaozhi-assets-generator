@@ -354,7 +354,13 @@ const getFontName = () => {
 
 const getEmojiName = () => {
   if (props.config.theme.emoji.type === 'preset' && props.config.theme.emoji.preset) {
-    return props.config.theme.emoji.preset === 'twemoji32' ? 'Twemoji 32×32' : 'Twemoji 64×64'
+    const presetNames = {
+      'twemoji32': 'Twemoji 32×32',
+      'twemoji64': 'Twemoji 64×64',
+      'noto-emoji_64': 'Noto Emoji 64×64',
+      'noto-emoji_128': 'Noto Emoji 128×128'
+    }
+    return presetNames[props.config.theme.emoji.preset] || props.config.theme.emoji.preset
   } else if (props.config.theme.emoji.type === 'custom') {
     return t('generateModal.customEmoji')
   } else if (props.config.theme.emoji.type === 'none') {

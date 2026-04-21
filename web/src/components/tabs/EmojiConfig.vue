@@ -82,7 +82,7 @@
           </div>
           
           <!-- 表情预览网格 -->
-          <div class="grid grid-cols-7 gap-1 justify-items-center">
+          <div class="grid grid-cols-7 gap-1 justify-items-center overflow-hidden">
             <div
               v-for="emotion in pack.preview"
               :key="emotion"
@@ -280,6 +280,7 @@ const presetEmojis = [
     name: t('emojiConfig.twitterEmojiName', { size: 32 }),
     description: t('emojiConfig.twitterEmojiDescription', { size: 32 }),
     size: 32,
+    format: 'png',
     preview: ['neutral', 'happy', 'laughing', 'funny', 'sad', 'angry', 'crying']
   },
   {
@@ -287,6 +288,23 @@ const presetEmojis = [
     name: t('emojiConfig.twitterEmojiName', { size: 64 }),
     description: t('emojiConfig.twitterEmojiDescription', { size: 64 }),
     size: 64,
+    format: 'png',
+    preview: ['neutral', 'happy', 'laughing', 'funny', 'sad', 'angry', 'crying']
+  },
+  {
+    id: 'noto-emoji_64',
+    name: t('emojiConfig.notoEmojiName', { size: 64 }),
+    description: t('emojiConfig.notoEmojiDescription', { size: 64 }),
+    size: 64,
+    format: 'gif',
+    preview: ['neutral', 'happy', 'laughing', 'funny', 'sad', 'angry', 'crying']
+  },
+  {
+    id: 'noto-emoji_128',
+    name: t('emojiConfig.notoEmojiName', { size: 128 }),
+    description: t('emojiConfig.notoEmojiDescription', { size: 128 }),
+    size: 128,
+    format: 'gif',
     preview: ['neutral', 'happy', 'laughing', 'funny', 'sad', 'angry', 'crying']
   }
 ]
@@ -474,8 +492,9 @@ const removeImage = async (emotionKey) => {
 }
 
 const getPresetEmojiUrl = (packId, emotion) => {
-  const size = packId === 'twemoji64' ? '64' : '32'
-  return `./static/twemoji${size}/${emotion}.png`
+  const pack = presetEmojis.find(p => p.id === packId)
+  const format = pack?.format || 'png'
+  return `./static/emojis/${packId}/${emotion}.${format}`
 }
 
 const getImagePreview = (emotionKey) => {
